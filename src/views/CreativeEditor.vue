@@ -1,89 +1,214 @@
 <script setup>
 import { ref } from 'vue'
 
-// 模拟剧本数据
-const scriptText = ref("场景：豪华办公室\n人物：顾满神（男，28岁），苏浅浅（女，22岁）\n\n[镜头1]\n顾满神坐在老板椅上，眉头紧锁。\n苏浅浅推门而入，手里端着咖啡。")
+// ==========================================
+// 状态管理
+// ==========================================
 
-// 模拟生成的分镜列表 (对应表格中的“场景分镜脚本生成模块”)
-const shots = ref([
-  { id: 1, desc: "顾满神坐在老板椅上，眉头紧锁", prompt: "Handsome CEO sitting in luxury office, frowning, cinematic lighting...", type: "中景" },
-  { id: 2, desc: "苏浅浅推门而入", prompt: "Young woman opening door, holding coffee, office background...", type: "全景" }
+const viewMode = ref('library') // library | editor
+const currentScript = ref(null)
+
+// 模拟深色风格剧本封面
+const scripts = ref([
+  { id: 1, title: "暗夜行动", date: "2025-01-10", cover: "https://via.placeholder.com/300/1a1a1a/555?text=Dark+Ops" },
+  { id: 2, title: "赛博侦探", date: "2025-02-14", cover: "https://via.placeholder.com/300/0f0f0f/333?text=Cyber" },
+  { id: 3, title: "荒原求生", date: "2025-03-01", cover: "https://via.placeholder.com/300/252525/666?text=Survival" }
 ])
 
-// 模拟 AI 拆解功能
-const analyzeScript = () => {
-  alert('正在调用 AI 拆解剧本...\n(功能对应：文本剧本拆解模块)')
+const scriptText = ref("场景：第10区-地下黑市\n时间：深夜\n人物：K（义体改造人），掮客\n\n[镜头1]\n霓虹灯在雨水中倒映出破碎的光斑。K 推开锈迹斑斑的铁门，蒸汽喷涌而出。\n掮客坐在阴影里，把玩着一枚芯片：\"你来晚了。\"")
+
+const shots = ref([
+  { 
+    id: 1, desc: "霓虹灯在雨水中倒映出破碎的光斑", 
+    prompt: "Cyberpunk street, rain, neon reflection, broken light, cinematic lighting...", 
+    shotType: "特写", angle: "俯拍", lighting: "赛博霓虹" 
+  },
+  {
+    id: 2, desc: "K 推开锈迹斑斑的铁门",
+    prompt: "Cyborg hand pushing rusty iron door, steam rising...",
+    shotType: "中景", angle: "平视", lighting: "冷光"
+  }
+])
+
+// AI 弹窗
+const showAIModal = ref(false)
+const selectedModel = ref('gpt-4')
+
+// ==========================================
+// 交互逻辑
+// ==========================================
+const openScript = (script) => {
+  currentScript.value = script
+  viewMode.value = 'editor'
 }
 
-// 模拟 提示词优化 功能
-const optimizePrompt = (shot) => {
-  shot.prompt += " (High Quality, 8k, detailed face)"
-  alert('提示词已优化：增加细节描述\n(功能对应：语法结构优化模块)')
+const triggerAI = () => showAIModal.value = true
+const confirmAI = () => {
+  showAIModal.value = false
+  alert('任务已提交至【任务中控台】！状态：执行中')
 }
+
+// 简单的辅助函数
+const deleteShot = (index) => shots.value.splice(index, 1)
+const cloneShot = (index) => shots.value.push({...shots.value[index], id: Date.now()})
+
 </script>
 
 <template>
-  <div class="editor-container">
-    <div class="panel script-panel">
-      <div class="panel-header">
-        <h3>📝 剧本输入</h3>
-        <button @click="analyzeScript" class="btn-primary">AI 一键拆解</button>
+  <div class="creative-page">
+    
+    <div v-if="viewMode === 'library'" class="library-container">
+      <div class="page-header">
+        <h2>剧本创作库</h2>
+        <div class="header-actions">
+          <button class="btn-secondary">导入本地</button>
+          <button class="btn-primary">＋ 新建剧本</button>
+        </div>
       </div>
-      <textarea v-model="scriptText" placeholder="在此粘贴剧本..."></textarea>
-    </div>
 
-    <div class="panel storyboard-panel">
-      <div class="panel-header">
-        <h3>🎬 分镜工作台</h3>
-        <span>共 {{ shots.length }} 个镜头</span>
-      </div>
-      <div class="shots-list">
-        <div v-for="shot in shots" :key="shot.id" class="shot-card">
-          <div class="shot-header">
-            <span class="shot-id">#{{ shot.id }}</span>
-            <select v-model="shot.type">
-              <option>特写</option>
-              <option>中景</option>
-              <option>全景</option>
-            </select>
+      <div class="script-grid">
+        <div v-for="s in scripts" :key="s.id" class="script-card" @click="openScript(s)">
+          <div class="cover-box">
+            <img :src="s.cover" />
+            <div class="hover-action">点击编辑</div>
           </div>
-          <p class="shot-desc">{{ shot.desc }}</p>
-          <div class="prompt-box">
-            <small>AI 提示词:</small>
-            <textarea v-model="shot.prompt"></textarea>
-            <button @click="optimizePrompt(shot)" class="btn-sm">✨ 优化提示词</button>
+          <div class="info-box">
+            <div class="title">{{ s.title }}</div>
+            <div class="date">{{ s.date }}</div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="panel control-panel">
-      <h3>⚙️ 生成参数</h3>
-      <div class="control-group">
-        <label>风格模型 (LoRA)</label>
-        <select><option>都市写实</option><option>赛博朋克</option></select>
+    <div v-else class="editor-container">
+      <header class="editor-toolbar">
+        <div class="left">
+          <button @click="viewMode='library'" class="btn-icon">←</button>
+          <span class="curr-title">{{ currentScript.title }}</span>
+        </div>
+        <div class="right">
+          <button class="btn-primary" @click="triggerAI">⚡ AI 剧本拆解</button>
+        </div>
+      </header>
+
+      <div class="editor-body">
+        <div class="panel text-panel">
+          <div class="panel-head">📝 剧本原文</div>
+          <textarea v-model="scriptText" placeholder="在此输入剧本..."></textarea>
+        </div>
+
+        <div class="panel shots-panel">
+          <div class="panel-head">
+            <span>分镜拆解结果 ({{ shots.length }})</span>
+          </div>
+          <div class="shots-list">
+            <div v-for="(shot, idx) in shots" :key="shot.id" class="shot-item">
+              <div class="shot-meta">
+                <span class="shot-idx">#{{ idx+1 }}</span>
+                <div class="shot-ctl">
+                  <button @click="cloneShot(idx)">📑</button>
+                  <button @click="deleteShot(idx)" class="danger">🗑️</button>
+                </div>
+              </div>
+              <div class="shot-content">
+                <p class="shot-desc">{{ shot.desc }}</p>
+                <div class="shot-tags">
+                  <span>{{ shot.shotType }}</span>
+                  <span>{{ shot.angle }}</span>
+                  <span>{{ shot.lighting }}</span>
+                </div>
+                <div class="prompt-preview">{{ shot.prompt }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="control-group">
-        <label>角色一致性 (FaceID)</label>
-        <div class="face-upload">[上传参考图]</div>
-      </div>
-      <button class="btn-primary full-width">生成视频片段</button>
     </div>
+
+    <div v-if="showAIModal" class="modal-mask">
+      <div class="modal-box">
+        <h3>启动 AI 拆解任务</h3>
+        <p class="hint">任务将提交至后台队列，请在左侧【任务中控台】查看进度。</p>
+        <div class="model-select">
+          <label :class="{active: selectedModel==='gpt-4'}">
+            <input type="radio" v-model="selectedModel" value="gpt-4"> GPT-4 Turbo
+          </label>
+          <label :class="{active: selectedModel==='claude'}">
+            <input type="radio" v-model="selectedModel" value="claude"> Claude 3 Opus
+          </label>
+        </div>
+        <div class="modal-foot">
+          <button @click="showAIModal=false" class="btn-secondary">取消</button>
+          <button @click="confirmAI" class="btn-primary">提交任务</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
 <style scoped>
-.editor-container { display: flex; gap: 20px; height: 100%; }
-.panel { background: white; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; }
-.script-panel { flex: 1; }
-.storyboard-panel { flex: 2; background: #eef0f5; }
-.control-panel { width: 280px; }
-textarea { width: 100%; height: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 10px; resize: none; }
-.btn-primary { background: #42b883; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
-.btn-sm { background: #6366f1; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px; margin-top: 5px; cursor: pointer; }
-.shot-card { background: white; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-.shot-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
-.prompt-box textarea { height: 60px; font-size: 12px; color: #666; margin-top: 5px; }
-.control-group { margin-bottom: 15px; }
-.full-width { width: 100%; margin-top: auto; }
+/* 深色模式页面容器 */
+.creative-page { height: 100%; background: #0f0f0f; color: #e0e0e0; display: flex; flex-direction: column; overflow: hidden; }
+
+/* 按钮通用 */
+button { cursor: pointer; border: none; border-radius: 4px; font-size: 13px; transition: 0.2s; }
+.btn-primary { background: #409EFF; color: white; padding: 8px 16px; font-weight: 500; }
+.btn-primary:hover { background: #66b1ff; }
+.btn-secondary { background: transparent; border: 1px solid #444; color: #ccc; padding: 7px 15px; }
+.btn-secondary:hover { border-color: #666; color: white; }
+.btn-icon { background: none; color: #888; font-size: 18px; padding: 0 10px; }
+.btn-icon:hover { color: white; }
+
+/* 1. 剧本库样式 */
+.library-container { padding: 40px; max-width: 1200px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #2a2a2a; padding-bottom: 20px; }
+.header-actions { display: flex; gap: 10px; }
+
+.script-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 25px; }
+.script-card { background: #1a1a1a; border-radius: 8px; overflow: hidden; border: 1px solid #2a2a2a; cursor: pointer; transition: 0.2s; }
+.script-card:hover { transform: translateY(-5px); border-color: #409EFF; }
+.cover-box { width: 100%; padding-top: 100%; position: relative; background: #000; }
+.cover-box img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.7; }
+.hover-action { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.6); opacity: 0; transition: 0.2s; font-weight: bold; }
+.script-card:hover .hover-action { opacity: 1; }
+.info-box { padding: 12px; }
+.info-box .title { font-weight: bold; margin-bottom: 4px; color: #fff; }
+.info-box .date { font-size: 12px; color: #666; }
+
+/* 2. 编辑器样式 */
+.editor-container { display: flex; flex-direction: column; height: 100%; }
+.editor-toolbar { height: 50px; background: #1a1a1a; border-bottom: 1px solid #2a2a2a; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; }
+.left { display: flex; align-items: center; gap: 10px; }
+.curr-title { font-weight: bold; font-size: 14px; }
+
+.editor-body { flex: 1; display: flex; padding: 15px; gap: 15px; overflow: hidden; }
+.panel { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; display: flex; flex-direction: column; }
+.panel-head { padding: 10px 15px; background: #202020; font-size: 13px; font-weight: bold; color: #ccc; border-bottom: 1px solid #2a2a2a; }
+
+.text-panel { flex: 1; }
+.text-panel textarea { flex: 1; background: #111; border: none; color: #ddd; padding: 15px; resize: none; outline: none; font-family: inherit; line-height: 1.6; }
+
+.shots-panel { flex: 1; }
+.shots-list { flex: 1; overflow-y: auto; padding: 10px; }
+.shot-item { background: #252525; border-radius: 6px; padding: 12px; margin-bottom: 10px; display: flex; gap: 10px; border-left: 3px solid #409EFF; }
+.shot-meta { display: flex; flex-direction: column; justify-content: space-between; align-items: center; color: #666; font-size: 12px; }
+.shot-ctl button { background: none; color: #666; padding: 2px; }
+.shot-ctl button:hover { color: #fff; }
+.shot-ctl button.danger:hover { color: #F56C6C; }
+
+.shot-content { flex: 1; }
+.shot-desc { margin: 0 0 8px 0; font-size: 14px; color: #fff; }
+.shot-tags span { display: inline-block; background: #333; color: #aaa; font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-right: 5px; }
+.prompt-preview { margin-top: 8px; font-size: 12px; color: #555; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Modal */
+.modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 200; }
+.modal-box { background: #252525; padding: 25px; border-radius: 8px; width: 400px; border: 1px solid #444; }
+.modal-box h3 { margin-top: 0; }
+.hint { color: #888; font-size: 13px; margin-bottom: 20px; }
+.model-select { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; }
+.model-select label { background: #1a1a1a; padding: 12px; border: 1px solid #333; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+.model-select label.active { border-color: #409EFF; background: rgba(64, 158, 255, 0.1); }
+.modal-foot { display: flex; justify-content: flex-end; gap: 10px; }
 </style>

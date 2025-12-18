@@ -1,64 +1,91 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterLink, RouterView, useRoute } from 'vue-router'
+
+const route = useRoute()
 </script>
 
 <template>
   <div class="app-layout">
-    <nav class="sidebar">
-      <div class="logo">🎥 AI短剧平台</div>
-      <RouterLink to="/" class="nav-item">📊 工作台</RouterLink>
-      <RouterLink to="/editor" class="nav-item">✨ 创作编辑器</RouterLink>
-      <RouterLink to="/assets" class="nav-item">🗂️ 资产库</RouterLink>
-      <RouterLink to="/tasks" class="nav-item">🚀 任务中心</RouterLink>
+    
+    <nav class="global-sidebar">
+      <div class="brand">
+        <div class="logo-icon">AI</div>
+        <div class="logo-text">Studio <span class="version">PRO</span></div>
+      </div>
+      
+      <div class="nav-links">
+        <RouterLink to="/editor" class="nav-item" title="剧本创作">
+          <span class="icon">📝</span>
+          <span class="text">剧本创作</span>
+        </RouterLink>
+
+        <RouterLink to="/storyboard" class="nav-item" title="分镜制作">
+          <span class="icon">🎬</span>
+          <span class="text">分镜制作</span>
+        </RouterLink>
+
+        <RouterLink to="/assets" class="nav-item" title="资产中心">
+          <span class="icon">🗂️</span>
+          <span class="text">资产中心</span>
+        </RouterLink>
+
+        <RouterLink to="/tasks" class="nav-item" title="任务中心">
+          <span class="icon">🧩</span>
+          <span class="text">任务中心</span>
+        </RouterLink>
+
+        <a class="nav-item disabled">
+          <span class="icon">🎥</span>
+          <span class="text">视频生成</span>
+        </a>
+      </div>
+
+      <div class="nav-footer">
+        <a class="nav-item"><span class="icon">⚙️</span> <span class="text">系统设置</span></a>
+      </div>
     </nav>
 
-    <main class="main-content">
+    <main class="app-content">
       <RouterView />
     </main>
   </div>
 </template>
 
-<style scoped>
-.app-layout {
-  display: flex;
-  height: 100vh;
-  width: 100vw;
-}
+<style>
+/* 全局重置 (Dark Mode Base) */
+html, body { margin: 0; padding: 0; height: 100%; font-family: 'Inter', 'PingFang SC', sans-serif; background: #0f0f0f; color: #E0E0E0; }
+#app { height: 100vh; display: flex; flex-direction: column; }
 
-.sidebar {
+.app-layout { display: flex; height: 100%; width: 100%; overflow: hidden; }
+
+/* --- 侧边栏样式 --- */
+.global-sidebar {
   width: 240px;
-  background-color: #1e1e2d;
-  color: white;
+  background-color: #1a1a1a;
+  border-right: 1px solid #2a2a2a;
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  flex-shrink: 0;
+  z-index: 100;
 }
 
-.logo {
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 40px;
-  color: #42b883;
-}
+.brand { height: 60px; display: flex; align-items: center; padding: 0 20px; gap: 10px; border-bottom: 1px solid #2a2a2a; }
+.logo-icon { width: 24px; height: 24px; background: #409EFF; border-radius: 4px; color: white; font-weight: bold; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+.logo-text { font-size: 16px; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 6px; }
+.version { font-size: 10px; background: #333; padding: 2px 4px; border-radius: 4px; color: #888; }
 
+.nav-links { flex: 1; padding: 20px 10px; display: flex; flex-direction: column; gap: 5px; }
 .nav-item {
-  color: #a2a3b7;
-  text-decoration: none;
-  padding: 12px 15px;
-  border-radius: 8px;
-  margin-bottom: 5px;
-  transition: 0.3s;
+  display: flex; align-items: center; padding: 10px 15px;
+  color: #888; text-decoration: none; transition: 0.2s; cursor: pointer; border-radius: 8px; font-size: 14px;
 }
+.nav-item:hover { background-color: #252525; color: #eee; }
+.nav-item.router-link-active { background-color: #2a2d3e; color: #409EFF; font-weight: 600; }
+.nav-item .icon { margin-right: 12px; font-size: 16px; width: 20px; text-align: center; }
+.nav-item.disabled { opacity: 0.4; cursor: not-allowed; }
 
-.nav-item:hover, .nav-item.router-link-active {
-  background-color: #2b2b40;
-  color: white;
-}
+.nav-footer { padding: 10px; border-top: 1px solid #2a2a2a; }
 
-.main-content {
-  flex: 1;
-  background-color: #f5f6fa;
-  overflow-y: auto;
-  padding: 20px;
-}
+/* 内容区 */
+.app-content { flex: 1; position: relative; overflow: hidden; background: #0f0f0f; }
 </style>
