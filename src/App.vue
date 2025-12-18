@@ -1,7 +1,5 @@
 <script setup>
-import { RouterLink, RouterView, useRoute } from 'vue-router'
-
-const route = useRoute()
+import { RouterLink, RouterView } from 'vue-router'
 </script>
 
 <template>
@@ -53,7 +51,7 @@ const route = useRoute()
 
 <style>
 /* 全局重置 (Dark Mode Base) */
-html, body { margin: 0; padding: 0; height: 100%; font-family: 'Inter', 'PingFang SC', sans-serif; background: #0f0f0f; color: #E0E0E0; }
+html, body { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', 'PingFang SC', sans-serif; background: #0f0f0f; color: #E0E0E0; }
 #app { height: 100vh; display: flex; flex-direction: column; }
 
 .app-layout { display: flex; height: 100%; width: 100%; overflow: hidden; }

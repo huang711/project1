@@ -1,11 +1,6 @@
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 
-// ==========================================
-// 1. 数据定义
-// ==========================================
-
-// 统计看板数据
 const stats = reactive({
   total: 4,
   running: 1,
@@ -14,10 +9,8 @@ const stats = reactive({
   avgTime: '45秒'
 })
 
-// 筛选状态：'all' | 'running' | 'failed' | 'success'
 const currentFilter = ref('all')
 
-// 模拟任务队列数据 (精简为4条)
 const rawTaskList = ref([
   { 
     id: 'T-20250315-01', shotName: '镜头01: 霓虹倒影', type: '视频生成', model: 'Sora-Turbo', 
@@ -37,12 +30,10 @@ const rawTaskList = ref([
   }
 ])
 
-// 日志/详情数据
 const taskDetails = ref([])
 const activeTask = ref(null)
 const showDrawer = ref(false)
 
-// 模拟实时进度更新
 let timer = null
 onMounted(() => {
   timer = setInterval(() => {
@@ -55,27 +46,18 @@ onMounted(() => {
 })
 onUnmounted(() => clearInterval(timer))
 
-// ==========================================
-// 2. 交互逻辑
-// ==========================================
-
-// 过滤列表
 const filteredList = computed(() => {
   if (currentFilter.value === 'all') return rawTaskList.value
   return rawTaskList.value.filter(t => t.status === currentFilter.value)
 })
 
-// 切换筛选器
 const setFilter = (status) => {
   currentFilter.value = status
 }
 
-// 打开详情抽屉 (模拟后端返回的中文日志)
 const openDetails = (task) => {
   activeTask.value = task
   showDrawer.value = true
-  
-  // 模拟中文日志流
   if (task.status === 'success') {
     taskDetails.value = [
       { time: '10:30:00', type: 'info', msg: '任务已提交到队列' },
@@ -99,7 +81,6 @@ const openDetails = (task) => {
   }
 }
 
-// 辅助样式函数
 const getStatusColor = (status) => {
   const map = { pending: 'gray', running: 'blue', success: 'green', failed: 'red' }
   return map[status] || 'gray'
@@ -112,48 +93,23 @@ const getStatusText = (status) => {
 
 <template>
   <div class="task-center-container">
-    
     <header class="dashboard-header">
       <div class="title-block">
         <h2>任务中心</h2>
         <span class="subtitle">Task Center</span>
       </div>
-      
       <div class="stats-row">
-        <div 
-          class="stat-card" 
-          :class="{ active: currentFilter === 'all' }"
-          @click="setFilter('all')"
-        >
-          <span class="label">任务总数</span>
-          <span class="val">{{ stats.total }}</span>
+        <div class="stat-card" :class="{ active: currentFilter === 'all' }" @click="setFilter('all')">
+          <span class="label">任务总数</span><span class="val">{{ stats.total }}</span>
         </div>
-        
-        <div 
-          class="stat-card" 
-          :class="{ active: currentFilter === 'running' }"
-          @click="setFilter('running')"
-        >
-          <span class="label">执行中</span>
-          <span class="val text-blue">{{ stats.running }}</span>
+        <div class="stat-card" :class="{ active: currentFilter === 'running' }" @click="setFilter('running')">
+          <span class="label">执行中</span><span class="val text-blue">{{ stats.running }}</span>
         </div>
-        
-        <div 
-          class="stat-card" 
-          :class="{ active: currentFilter === 'failed' }"
-          @click="setFilter('failed')"
-        >
-          <span class="label">已失败</span>
-          <span class="val text-red">{{ stats.failed }}</span>
+        <div class="stat-card" :class="{ active: currentFilter === 'failed' }" @click="setFilter('failed')">
+          <span class="label">已失败</span><span class="val text-red">{{ stats.failed }}</span>
         </div>
-        
-        <div 
-          class="stat-card"
-          :class="{ active: currentFilter === 'success' }"
-          @click="setFilter('success')"
-        >
-          <span class="label">已完成</span>
-          <span class="val text-green">{{ stats.success }}</span>
+        <div class="stat-card" :class="{ active: currentFilter === 'success' }" @click="setFilter('success')">
+          <span class="label">已完成</span><span class="val text-green">{{ stats.success }}</span>
         </div>
       </div>
     </header>
@@ -161,11 +117,7 @@ const getStatusText = (status) => {
     <div class="table-wrapper">
       <div class="table-toolbar">
         <div class="left-tools">
-          <span class="current-filter-label">当前视图：
-            {{ currentFilter === 'all' ? '全部任务' : 
-               currentFilter === 'running' ? '执行中' : 
-               currentFilter === 'failed' ? '异常任务' : '已完成' }}
-          </span>
+          <span class="current-filter-label">当前视图：{{ currentFilter === 'all' ? '全部任务' : currentFilter === 'running' ? '执行中' : currentFilter === 'failed' ? '异常任务' : '已完成' }}</span>
         </div>
         <div class="right-tools">
           <button class="icon-btn" title="刷新">🔄</button>
@@ -193,18 +145,13 @@ const getStatusText = (status) => {
               <td><span class="type-badge">{{ task.type }}</span></td>
               <td>
                 <div class="status-badge" :class="getStatusColor(task.status)">
-                  <span class="dot"></span>
-                  {{ getStatusText(task.status) }}
+                  <span class="dot"></span>{{ getStatusText(task.status) }}
                 </div>
               </td>
               <td>
                 <div class="progress-container">
                   <div class="progress-bg">
-                    <div 
-                      class="progress-fill" 
-                      :class="getStatusColor(task.status)"
-                      :style="{ width: task.progress + '%' }"
-                    ></div>
+                    <div class="progress-fill" :class="getStatusColor(task.status)" :style="{ width: task.progress + '%' }"></div>
                   </div>
                   <span class="progress-text">{{ Math.floor(task.progress) }}%</span>
                 </div>
@@ -214,7 +161,6 @@ const getStatusText = (status) => {
                 <button class="btn-detail" @click="openDetails(task)">查看</button>
               </td>
             </tr>
-            
             <tr v-if="filteredList.length === 0">
               <td colspan="7" class="empty-state">暂无相关任务数据</td>
             </tr>
@@ -226,13 +172,9 @@ const getStatusText = (status) => {
     <div class="drawer-mask" v-if="showDrawer" @click.self="showDrawer = false">
       <div class="drawer-content">
         <div class="drawer-header">
-          <div>
-            <h3>任务详情</h3>
-            <span class="task-id-tag">{{ activeTask?.id }}</span>
-          </div>
+          <div><h3>任务详情</h3><span class="task-id-tag">{{ activeTask?.id }}</span></div>
           <button class="close-btn" @click="showDrawer = false">×</button>
         </div>
-        
         <div class="drawer-body">
           <div class="timeline-box">
             <h4>执行记录</h4>
@@ -250,7 +192,6 @@ const getStatusText = (status) => {
             </div>
           </div>
         </div>
-
         <div class="drawer-footer">
           <button class="btn-outline" v-if="activeTask?.status === 'failed'">重试任务</button>
           <button class="btn-outline" v-if="activeTask?.status === 'running'">取消任务</button>
@@ -258,63 +199,46 @@ const getStatusText = (status) => {
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
 <style scoped>
-/* 容器 */
 .task-center-container { height: 100%; display: flex; flex-direction: column; padding: 20px 40px; box-sizing: border-box; background: #0f0f0f; color: #e0e0e0; }
-
-/* 1. Header */
 .dashboard-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; border-bottom: 1px solid #2a2a2a; padding-bottom: 20px; }
 .title-block h2 { margin: 0; font-size: 24px; color: #fff; letter-spacing: 1px; }
 .subtitle { font-size: 12px; color: #666; text-transform: uppercase; margin-top: 5px; display: block; }
-
 .stats-row { display: flex; gap: 20px; }
-.stat-card { 
-  display: flex; flex-direction: column; align-items: flex-end; padding: 10px 15px; border-radius: 8px; 
-  cursor: pointer; transition: 0.2s; border: 1px solid transparent; 
-}
+.stat-card { display: flex; flex-direction: column; align-items: flex-end; padding: 10px 15px; border-radius: 8px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
 .stat-card:hover { background: #1a1a1a; }
 .stat-card.active { background: #202020; border-color: #409EFF; }
 .stat-card.active .label { color: #fff; }
-
 .stat-card .label { font-size: 12px; color: #666; margin-bottom: 4px; }
 .stat-card .val { font-size: 24px; font-weight: bold; line-height: 1; font-family: 'Segoe UI', sans-serif; }
 .text-blue { color: #409EFF; }
 .text-green { color: #67C23A; }
 .text-red { color: #F56C6C; }
-
-/* 2. Table Area */
 .table-wrapper { flex: 1; display: flex; flex-direction: column; background: #1a1a1a; border-radius: 8px; border: 1px solid #2a2a2a; overflow: hidden; }
 .table-toolbar { height: 50px; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; border-bottom: 1px solid #2a2a2a; background: #202020; }
 .current-filter-label { font-size: 13px; color: #ccc; }
-
 .right-tools { display: flex; gap: 10px; align-items: center; }
 .search-input { background: #111; border: 1px solid #333; color: #ccc; padding: 6px 10px; border-radius: 4px; font-size: 12px; outline: none; width: 180px; }
 .icon-btn { background: none; border: none; color: #888; cursor: pointer; font-size: 16px; }
 .icon-btn:hover { color: #fff; }
-
 .table-scroll-area { flex: 1; overflow-y: auto; }
 .custom-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
 .custom-table th { position: sticky; top: 0; background: #202020; color: #888; font-weight: 600; padding: 12px 15px; border-bottom: 1px solid #2a2a2a; font-size: 12px; }
 .custom-table td { padding: 12px 15px; border-bottom: 1px solid #252525; color: #ccc; vertical-align: middle; }
 .custom-table tr:hover td { background: #252525; }
 .empty-state { text-align: center; color: #666; padding: 40px; }
-
-/* 表格元素 */
 .font-mono { font-family: monospace; color: #888; font-size: 12px; }
 .font-bold { font-weight: 600; color: #eee; }
 .type-badge { border: 1px solid #444; color: #aaa; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
-
 .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
 .status-badge .dot { width: 6px; height: 6px; border-radius: 50%; }
 .status-badge.gray { background: rgba(255,255,255,0.05); color: #888; } .status-badge.gray .dot { background: #888; }
 .status-badge.blue { background: rgba(64, 158, 255, 0.1); color: #409EFF; } .status-badge.blue .dot { background: #409EFF; box-shadow: 0 0 5px #409EFF; }
 .status-badge.green { background: rgba(103, 194, 58, 0.1); color: #67C23A; } .status-badge.green .dot { background: #67C23A; }
 .status-badge.red { background: rgba(245, 108, 108, 0.1); color: #F56C6C; } .status-badge.red .dot { background: #F56C6C; }
-
 .progress-container { display: flex; align-items: center; gap: 10px; }
 .progress-bg { flex: 1; height: 6px; background: #333; border-radius: 3px; overflow: hidden; }
 .progress-fill { height: 100%; border-radius: 3px; transition: width 0.3s ease; }
@@ -322,20 +246,15 @@ const getStatusText = (status) => {
 .progress-fill.green { background: #67C23A; }
 .progress-fill.red { background: #F56C6C; }
 .progress-text { font-size: 12px; color: #666; width: 35px; text-align: right; }
-
 .btn-detail { background: transparent; border: 1px solid #444; color: #ccc; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; transition: 0.2s; }
 .btn-detail:hover { border-color: #409EFF; color: #409EFF; }
-
-/* 3. Drawer */
 .drawer-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; display: flex; justify-content: flex-end; backdrop-filter: blur(2px); }
 .drawer-content { width: 450px; background: #1a1a1a; border-left: 1px solid #333; display: flex; flex-direction: column; box-shadow: -5px 0 20px rgba(0,0,0,0.5); animation: slideIn 0.3s ease-out; }
 @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-
 .drawer-header { height: 60px; padding: 0 20px; border-bottom: 1px solid #2a2a2a; display: flex; justify-content: space-between; align-items: center; background: #202020; }
 .drawer-header h3 { margin: 0; font-size: 16px; color: #fff; }
 .task-id-tag { font-size: 12px; color: #666; font-family: monospace; display: block; margin-top: 4px; }
 .close-btn { background: none; border: none; color: #888; font-size: 24px; cursor: pointer; }
-
 .drawer-body { flex: 1; padding: 20px; overflow-y: auto; }
 .timeline-box h4 { margin: 0 0 15px 0; font-size: 14px; color: #ccc; }
 .timeline-list { display: flex; flex-direction: column; gap: 15px; border-left: 2px solid #333; padding-left: 20px; margin-left: 10px; }
@@ -348,7 +267,6 @@ const getStatusText = (status) => {
 .timeline-item .node.running { background: #E6A23C; box-shadow: 0 0 5px #E6A23C; }
 .timeline-item .msg { font-size: 13px; color: #ddd; }
 .timeline-item .msg.error { color: #F56C6C; }
-
 .drawer-footer { padding: 15px 20px; border-top: 1px solid #2a2a2a; display: flex; justify-content: flex-end; gap: 10px; background: #202020; }
 .btn-outline { background: transparent; border: 1px solid #555; color: #ccc; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
 .btn-solid { background: #409EFF; border: none; color: white; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
