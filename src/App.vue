@@ -13,28 +13,28 @@ import { RouterLink, RouterView } from 'vue-router'
       
       <div class="nav-links">
         <RouterLink to="/editor" class="nav-item" title="剧本创作">
-          <span class="icon">📝</span>
+
           <span class="text">剧本创作</span>
         </RouterLink>
 
         <RouterLink to="/storyboard" class="nav-item" title="分镜制作">
-          <span class="icon">🎬</span>
+
           <span class="text">分镜制作</span>
         </RouterLink>
 
         <RouterLink to="/assets" class="nav-item" title="资产中心">
-          <span class="icon">🗂️</span>
+
           <span class="text">资产中心</span>
         </RouterLink>
 
         <RouterLink to="/tasks" class="nav-item" title="任务中心">
-          <span class="icon">🧩</span>
+
           <span class="text">任务中心</span>
         </RouterLink>
 
         <a class="nav-item disabled">
-          <span class="icon">🎥</span>
-          <span class="text">视频生成</span>
+
+          <span class="text">看板</span>
         </a>
       </div>
 

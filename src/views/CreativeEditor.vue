@@ -25,21 +25,21 @@ const scripts = ref([
 
 const scriptText = ref("场景：第10区-地下黑市\n时间：深夜\n人物：K（义体改造人），掮客\n\n[镜头1]\n霓虹灯在雨水中倒映出破碎的光斑。K 推开锈迹斑斑的铁门，蒸汽喷涌而出。\n掮客坐在阴影里，把玩着一枚芯片：\"你来晚了。\"")
 
-// 分镜列表 (升级为专业字段)
+// 分镜列表
 const shots = ref([
   { 
     id: 1, 
-    shotId: "S-01", // 业务镜号
-    scene: "EXT. 地下黑市 - NIGHT", // 场景标题
-    desc: "霓虹灯在积水的地面反射出破碎的红蓝光斑，雨水淅淅沥沥地落下。", // 画面内容
-    dialogue: "（无对白，只有雨声）", // 对白
-    duration: "3s", // 时长
+    shotId: "S-01", 
+    scene: "EXT. 地下黑市 - NIGHT", 
+    desc: "霓虹灯在积水的地面反射出破碎的红蓝光斑，雨水淅淅沥沥地落下。", 
+    dialogue: "（无对白，只有雨声）", 
+    duration: "3s", 
     shotType: "特写 (CU)", 
     angle: "俯拍 (High Angle)", 
     camera: "固定 (Static)",
     lighting: "赛博霓虹",
-    sound: "环境音：雨声、远处的警笛", // 音效
-    remarks: "强调地面的湿润质感" // 备注
+    sound: "环境音：雨声、远处的警笛", 
+    remarks: "强调地面的湿润质感" 
   },
   {
     id: 2, 
@@ -77,6 +77,15 @@ const confirmAI = () => {
 
 // --- 分镜操作核心逻辑 ---
 
+const saveAllShots = () => {
+  alert(`成功保存 ${shots.value.length} 个分镜数据！`)
+}
+
+const saveShot = (index) => {
+  const shot = shots.value[index]
+  alert(`分镜 [${shot.shotId}] 保存成功！`)
+}
+
 const deleteShot = (index) => {
   if(confirm('确认删除该镜头？')) shots.value.splice(index, 1)
 }
@@ -84,7 +93,7 @@ const deleteShot = (index) => {
 const cloneShot = (index) => {
   const newShot = JSON.parse(JSON.stringify(shots.value[index]))
   newShot.id = Date.now()
-  newShot.shotId += " (Copy)" // 标记副本
+  newShot.shotId += " (Copy)" 
   shots.value.splice(index + 1, 0, newShot)
 }
 
@@ -141,19 +150,22 @@ const moveDown = (index) => {
           <span class="curr-title">{{ currentScript.title }}</span>
         </div>
         <div class="right">
-          <button class="btn-primary" @click="triggerAI">⚡ AI 深度拆解</button>
-        </div>
+          </div>
       </header>
 
       <div class="editor-body">
         <div class="panel text-panel">
-          <div class="panel-head">📝 剧本原文</div>
+          <div class="panel-head">
+            <span>📝 剧本原文</span>
+            <button class="btn-xs-primary" @click="triggerAI">⚡ AI 拆解剧本</button>
+          </div>
           <textarea v-model="scriptText" placeholder="在此输入剧本..."></textarea>
         </div>
 
         <div class="panel shots-panel">
           <div class="panel-head">
             <span>分镜可视化拆解 ({{ shots.length }})</span>
+            <button class="btn-xs-primary" @click="saveAllShots">💾 保存全部分镜</button>
           </div>
           <div class="shots-list">
             <div v-for="(shot, idx) in shots" :key="shot.id" class="shot-card-pro">
@@ -171,11 +183,14 @@ const moveDown = (index) => {
                   </div>
                 </div>
                 <div class="shot-actions">
-                  <button @click="moveUp(idx)" :disabled="idx === 0" title="上移">⬆️</button>
-                  <button @click="moveDown(idx)" :disabled="idx === shots.length - 1" title="下移">⬇️</button>
+                  <button @click="saveShot(idx)" title="保存此分镜" class="save-btn">保存分镜</button>
                   <div class="divider"></div>
-                  <button @click="cloneShot(idx)" title="克隆">📑</button>
-                  <button @click="deleteShot(idx)" class="danger" title="删除">🗑️</button>
+                  
+                  <button @click="moveUp(idx)" :disabled="idx === 0" title="上移">⬆上</button>
+                  <button @click="moveDown(idx)" :disabled="idx === shots.length - 1" title="下移">⬇下</button>
+                  <div class="divider"></div>
+                  <button @click="cloneShot(idx)" title="克隆">复制</button>
+                  <button @click="deleteShot(idx)" class="danger" title="删除">删除</button>
                 </div>
               </div>
 
@@ -269,6 +284,12 @@ button { cursor: pointer; border: none; border-radius: 4px; font-size: 13px; tra
 .btn-icon { background: none; color: #888; font-size: 18px; padding: 0 10px; }
 .btn-icon:hover { color: white; }
 
+/* 小号主色按钮 (用于面板头部) */
+.btn-xs-primary { 
+  background: #409EFF; color: white; padding: 4px 10px; font-size: 11px; font-weight: bold; border-radius: 4px; 
+}
+.btn-xs-primary:hover { background: #66b1ff; }
+
 /* 1. 剧本库视图 */
 .library-container { padding: 40px; max-width: 1200px; margin: 0 auto; width: 100%; box-sizing: border-box; }
 .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #2a2a2a; padding-bottom: 20px; }
@@ -292,7 +313,13 @@ button { cursor: pointer; border: none; border-radius: 4px; font-size: 13px; tra
 
 .editor-body { flex: 1; display: flex; padding: 15px; gap: 15px; overflow: hidden; }
 .panel { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; display: flex; flex-direction: column; }
-.panel-head { padding: 10px 15px; background: #202020; font-size: 13px; font-weight: bold; color: #ccc; border-bottom: 1px solid #2a2a2a; }
+
+/* 面板头部优化: Flex布局 */
+.panel-head { 
+  padding: 10px 15px; background: #202020; font-size: 13px; font-weight: bold; color: #ccc; 
+  border-bottom: 1px solid #2a2a2a; border-radius: 8px 8px 0 0;
+  display: flex; justify-content: space-between; align-items: center;
+}
 
 /* 左侧文本区 */
 .text-panel { flex: 1; min-width: 300px; }
@@ -336,6 +363,7 @@ button { cursor: pointer; border: none; border-radius: 4px; font-size: 13px; tra
 .shot-actions button { background: transparent; color: #888; padding: 2px 6px; font-size: 14px; }
 .shot-actions button:hover:not(:disabled) { color: #fff; background: rgba(255,255,255,0.1); }
 .shot-actions button.danger:hover { color: #F56C6C; }
+.save-btn:hover { color: #67C23A !important; } /* 保存按钮悬停绿色 */
 .divider { width: 1px; height: 12px; background: #444; margin: 0 4px; }
 
 /* 2. 核心内容区 */
